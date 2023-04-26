@@ -1,0 +1,27 @@
+{
+  "name": "cp-svg-icon",
+  "version": "1.0.0",
+  "description": "Collect and copy svg icon content into one svg icon under <def>",
+  "main": "main.js",
+  "scripts": {
+    "test": "test",
+    "dev": "npx ts-node ./src/index.ts"
+  },
+  "keywords": [
+    "copy svg",
+    "read svg file content",
+    "copy svg file content defs"
+  ],
+  "author": "Saiko Bektenbai <s.bektenbai@gmail.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^18.16.1",
+    "@types/xml2js": "^0.4.11",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "xml2js": "^0.5.0"
+  }
+}
