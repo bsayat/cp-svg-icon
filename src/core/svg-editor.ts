@@ -12,13 +12,28 @@ export class SvgEditor {
         viewBox: '0 0 0 0',
         xmlns: 'http://www.w3.org/2000/svg'
       },
-      defs: []
+      defs: {
+        svg: []
+      }
     }
   };
 
   constructor(svgId: string) {
     this._svgId = svgId;
     this._builder = new xml2js.Builder();
+
+    const svg = {
+      defs: [
+        { $: {svg: { d: 'M10 10 L90 90', stroke: 'red' }} },
+        { $: {svg: { d: 'M10 10 L90 90', stroke: 'green' }} },
+        { $: {svg: { d: 'M10 10 L90 90', stroke: 'blue' }} },
+      ],
+      $: { viewBox: '0 0 100 100' }
+    };
+
+    const xml = this._builder.buildObject({ svg });
+
+    console.log(xml);
 
     this._createFolder();
     this._svgFileNames = this._getSvgFileNames();
@@ -38,7 +53,7 @@ export class SvgEditor {
   private _prepareContent(svgFileName: string): void {
     xml2js.parseString(this._getFileContent(svgFileName), (_, result) => {
       result.svg.$.id = svgFileName.replace('.svg', '');
-      this._svgRoot.svg.defs.push(result as never);
+      this._svgRoot.svg.defs.svg.push( result.svg as never );
     });
   }
 
@@ -50,12 +65,9 @@ export class SvgEditor {
   }
 
   private _writeContent(): void {
+    console.log(this._svgRoot.svg.defs.svg[0]);
     fs.writeFileSync(
-      path.join(
-        process.env.SVG_OUT_PATH!,
-        this._svgId,
-        `${this._svgId}.svg`
-      ),
+      path.join(process.env.SVG_OUT_PATH!, this._svgId, `${this._svgId}.svg`),
       this._builder.buildObject(this._svgRoot)
     );
   }
@@ -67,18 +79,12 @@ export class SvgEditor {
   }
 
   private _getSvgFileNames(): string[] {
-    return fs.readdirSync(
-      path.join(process.env.SVG_FILES_PATH!, this._svgId)
-    );
+    return fs.readdirSync(path.join(process.env.SVG_FILES_PATH!, this._svgId));
   }
 
   private _saveIconsId(): void {
     fs.writeFileSync(
-      path.join(
-        process.env.SVG_OUT_PATH!,
-        this._svgId,
-        `${this._svgId}.ts`
-      ),
+      path.join(process.env.SVG_OUT_PATH!, this._svgId, `${this._svgId}.ts`),
       this._getIconsIdContent()
     );
   }
