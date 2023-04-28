@@ -22,19 +22,6 @@ export class SvgEditor {
     this._svgId = svgId;
     this._builder = new xml2js.Builder();
 
-    const svg = {
-      defs: [
-        { $: {svg: { d: 'M10 10 L90 90', stroke: 'red' }} },
-        { $: {svg: { d: 'M10 10 L90 90', stroke: 'green' }} },
-        { $: {svg: { d: 'M10 10 L90 90', stroke: 'blue' }} },
-      ],
-      $: { viewBox: '0 0 100 100' }
-    };
-
-    const xml = this._builder.buildObject({ svg });
-
-    console.log(xml);
-
     this._createFolder();
     this._svgFileNames = this._getSvgFileNames();
 
