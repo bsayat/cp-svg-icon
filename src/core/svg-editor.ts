@@ -2,67 +2,40 @@ import fs from 'fs';
 import path from 'path';
 import xml2js, { Builder } from 'xml2js';
 
-export class SvgEditor {
-  private readonly _svgId: string;
-  private _svgFileNames: string[];
-  private _builder: Builder;
-  private _svgRoot = {
-    svg: {
-      $: {
-        viewBox: '0 0 0 0',
-        xmlns: 'http://www.w3.org/2000/svg'
-      },
-      defs: {
-        svg: []
-      }
-    }
-  };
+export abstract class SvgEditor {
+  protected readonly _svgId: string;
+  protected _svgFileNames: string[];
+  protected _builder: Builder;
+  protected _svgContent: any;
 
   constructor(svgId: string) {
     this._svgId = svgId;
     this._builder = new xml2js.Builder();
 
-    this._createFolder();
+    this._createRootFolder();
     this._svgFileNames = this._getSvgFileNames();
-
-    this._createSvgFile();
     this._saveIconsId();
   }
 
-  private _createSvgFile(): void {
-    for (const svgFileName of this._svgFileNames) {
-      this._prepareContent(svgFileName);
-    }
+  protected abstract _prepareSvgRoot(): any;
+  protected abstract _createSvgFile(): void;
+  protected abstract _prepareContent(svgFileName: string): void;
 
-    this._writeContent();
-  }
-
-  private _prepareContent(svgFileName: string): void {
-    xml2js.parseString(this._getFileContent(svgFileName), (_, result) => {
-      result.svg.$.id = svgFileName.replace('.svg', '');
-      this._svgRoot.svg.defs.svg.push( result.svg as never );
-    });
-  }
-
-  private _getFileContent(fileName: string): string {
+  protected _getFileContent(fileName: string): string {
     return fs.readFileSync(
       path.join(process.env.SVG_FILES_PATH!, this._svgId, fileName),
       'utf-8'
     );
   }
 
-  private _writeContent(): void {
-    console.log(this._svgRoot.svg.defs.svg[0]);
-    fs.writeFileSync(
-      path.join(process.env.SVG_OUT_PATH!, this._svgId, `${this._svgId}.svg`),
-      this._builder.buildObject(this._svgRoot)
+  // this methods will be in this class
+  private _createRootFolder(folderName?: string): void {
+    fs.mkdirSync(
+      path.join(process.env.SVG_OUT_PATH!, folderName ?? this._svgId),
+      {
+        recursive: true
+      }
     );
-  }
-
-  private _createFolder(): void {
-    fs.mkdirSync(path.join(process.env.SVG_OUT_PATH!, this._svgId), {
-      recursive: true
-    });
   }
 
   private _getSvgFileNames(): string[] {
@@ -82,6 +55,13 @@ export class SvgEditor {
       .map((f) => f.replace(/-/g, '_'))
       .map((f) => `\t"${f}"`)
       .join(', \n')}\n];\n`;
+  }
+
+  protected _writeContent(content: any, fileName?: string): void {
+    fs.writeFileSync(
+      path.join(process.env.SVG_OUT_PATH!, this._svgId, `${fileName ?? this._svgId}.svg`),
+      this._builder.buildObject(content)
+    );
   }
 
   static clearOutputFolder(): void {
