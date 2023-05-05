@@ -19,7 +19,7 @@ export class PlainSvgEditor extends SvgEditor {
 
   protected _prepareContent(svgFileName: string): void {
     xml2js.parseString(this._getFileContent(svgFileName), (_, result) => {
-      result.svg.$.id = svgFileName.replace('.svg', '');
+      result.svg.$.id = svgFileName.replace(/-/g, '_').replace('.svg', '');
       this._svgContent.svg.defs.svg.push(result.svg as never);
     });
   }
